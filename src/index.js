@@ -86,12 +86,12 @@ app.get('/products/:id', (req, res) => {
 	res.status(200).json({ id: productId, data: product.name });
 });
 
-app.use((req, res, next) => {
-	res.status(404).send('404 Not Found');
-});
+app.use((error, req, res, next) => {
+	if (error.statusCode) {
+		res.status(error.status).json({ message: error.message });
+	}
 
-app.use((req, res, next) => {
-	res.status(500).send('Internal Server Error');
+	res.status(500).json({ message: 'Internal Server Error' });
 });
 
 app.listen(PORT, () => {
