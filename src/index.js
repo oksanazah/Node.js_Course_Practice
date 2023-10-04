@@ -1,6 +1,7 @@
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
+const { products } = require('./products');
 
 const app = express();
 const PORT = 3000;
@@ -51,7 +52,38 @@ app.get('/health-check', (req, res) => {
  *         description: Internal Server Error
  */
 app.get('/products', (req, res) => {
-	res.status(200).json({ data: 'Products' });
+	res.status(200).json({ data: products });
+});
+
+/**
+ * @swagger
+ * /products/{id}:
+ *   get:
+ *     summary: Get product by id
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the product to fetch
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Product
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Internal Server Error
+ */
+app.get('/products/:id', (req, res) => {
+	const productId = req.params.id;
+	const product = products.find((item) => item.id === productId);
+
+	if (!product) {
+		res.status(404).json({ error: 'Product not found' });
+	}
+
+	res.status(200).json({ id: productId, data: product.name });
 });
 
 app.use((req, res, next) => {
