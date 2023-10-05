@@ -1,12 +1,14 @@
-const express = require('express');
-const swaggerUi = require('swagger-ui-express');
-const swaggerJsdoc = require('swagger-jsdoc');
-const { products } = require('./products');
+import { Request, Response, NextFunction } from 'express';
+import express, { Express } from 'express';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsDoc, { Options } from 'swagger-jsdoc';
+import { products } from './products';
+import { Error, Product } from './model';
 
-const app = express();
+const app: Express = express();
 const PORT = 3000;
 
-const options = {
+const options: Options = {
 	definition: {
 		openapi: '3.0.0',
 		info: {
@@ -14,14 +16,14 @@ const options = {
 			version: '1.0.0',
 		},
 	},
-	apis: ['./src/index.js'],
+	apis: ['./src/index.ts'],
 };
 
-const swaggerSpec = swaggerJsdoc(options);
+const swaggerSpec = swaggerJsDoc(options);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response): void => {
 	res.send('Hello World!');
 });
 
@@ -36,7 +38,7 @@ app.get('/', (req, res) => {
  *       500:
  *         description: Internal Server Error
  */
-app.get('/health-check', (req, res) => {
+app.get('/health-check', (req: Request, res: Response): void => {
 	res.status(200).json({ status: 'server is running' });
 });
 
@@ -51,7 +53,7 @@ app.get('/health-check', (req, res) => {
  *       500:
  *         description: Internal Server Error
  */
-app.get('/products', (req, res) => {
+app.get('/products', (req: Request, res: Response): void => {
 	res.status(200).json({ data: products });
 });
 
@@ -75,25 +77,25 @@ app.get('/products', (req, res) => {
  *       500:
  *         description: Internal Server Error
  */
-app.get('/products/:id', (req, res) => {
+app.get('/products/:id', (req: Request, res: Response): void => {
 	const productId = req.params.id;
-	const product = products.find((item) => item.id === productId);
+	const product = products.find((item: Product): boolean => item.id === productId);
 
 	if (!product) {
 		res.status(404).json({ error: 'Product not found' });
+	} else {
+		res.status(200).json({ id: productId, data: product.name });
 	}
-
-	res.status(200).json({ id: productId, data: product.name });
 });
 
-app.use((error, req, res, next) => {
-	if (error.statusCode) {
+app.use((error: Error, req: Request, res: Response, next: NextFunction): void => {
+	if (error.status) {
 		res.status(error.status).json({ message: error.message });
 	}
 
 	res.status(500).json({ message: 'Internal Server Error' });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, (): void => {
 	console.log(`Server is running on port ${PORT}`);
 });
