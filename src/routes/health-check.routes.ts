@@ -14,7 +14,7 @@ const router: Router = Router();
  *         description: Internal Server Error
  */
 router.get('/', (req: Request, res: Response): void => {
-	res.status(200).json({ status: 'server is running' });
+  res.status(200).json({ status: 'server is running' });
 });
 
 export default router;

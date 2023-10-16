@@ -17,7 +17,7 @@ const router: Router = Router();
  *         description: Internal Server Error
  */
 router.get('/', (req: Request, res: Response): void => {
-	res.status(200).json({ data: products });
+  res.status(200).json({ data: products });
 });
 
 /**
@@ -41,14 +41,16 @@ router.get('/', (req: Request, res: Response): void => {
  *         description: Internal Server Error
  */
 router.get('/:id', (req: Request, res: Response): void => {
-	const productId = req.params.id;
-	const product = products.find((item: Product): boolean => item.id === productId);
+  const productId = req.params.id;
+  const product = products.find(
+    (item: Product): boolean => item.id === productId,
+  );
 
-	if (!product) {
-		res.status(404).json({ error: 'Product not found' });
-	} else {
-		res.status(200).json({ id: productId, data: product.name });
-	}
+  if (!product) {
+    res.status(404).json({ error: 'Product not found' });
+  } else {
+    res.status(200).json({ id: productId, data: product.name });
+  }
 });
 
 export default router;
