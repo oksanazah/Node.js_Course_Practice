@@ -40,17 +40,17 @@ router.get('/', (req: Request, res: Response): void => {
  *       500:
  *         description: Internal Server Error
  */
-router.get('/:id', (req: Request, res: Response): void => {
+router.get('/:id', (req: Request, res: Response) => {
   const productId = req.params.id;
   const product = products.find(
     (item: Product): boolean => item.id === productId,
   );
 
   if (!product) {
-    res.status(404).json({ error: 'Product not found' });
-  } else {
-    res.status(200).json({ id: productId, data: product.name });
+    return res.status(404).json({ error: 'Product not found' });
   }
+
+  return res.status(200).json({ id: productId, data: product.name });
 });
 
 export default router;
