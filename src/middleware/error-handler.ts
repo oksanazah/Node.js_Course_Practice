@@ -7,12 +7,12 @@ const errorHandler = (
   req: Request,
   res: Response,
   next: NextFunction,
-): void => {
+) => {
   if (error.status) {
-    res.status(error.status).json({ message: error.message });
+    return res.status(error.status).json({ message: error.message });
   }
 
-  res.status(500).json({ message: 'Internal Server Error' });
+  return res.status(500).json({ message: 'Internal Server Error' });
 };
 
 export default errorHandler;

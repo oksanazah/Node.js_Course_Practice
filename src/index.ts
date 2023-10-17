@@ -11,8 +11,8 @@ const PORT = 3000;
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-app.get('/', (req: Request, res: Response): void => {
-  res.send('Hello World!');
+app.get('/', (req: Request, res: Response) => {
+  return res.send('Hello World!');
 });
 
 app.use('/health-check', healthChekcRouter);
