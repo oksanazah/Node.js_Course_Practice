@@ -1,3 +1,5 @@
+import mongoose from 'mongoose';
+
 export interface Error {
   status: number;
   message: string;
@@ -5,5 +7,18 @@ export interface Error {
 
 export interface Product {
   id: string;
+  name: string;
+}
+
+export interface Movie {
+  _id: mongoose.Types.ObjectId;
+  title: string;
+  description: string;
+  releaseDate: Date;
+  genre: string[];
+}
+
+export interface Genre {
+  _id: mongoose.Types.ObjectId;
   name: string;
 }
