@@ -1,5 +1,4 @@
-import { Router, Request, Response } from 'express';
-import { MongooseError } from 'mongoose';
+import { Router, Request, Response, NextFunction } from 'express';
 
 import { GenreModel } from '../models/genres.schemas';
 import { Genre } from '../models/models';
@@ -28,7 +27,7 @@ const router: Router = Router();
  *       500:
  *         description: Internal Server Error
  */
-router.get('/', (req: Request, res: Response) => {
+router.get('/', (req: Request, res: Response, next: NextFunction) => {
   GenreModel.find()
     .then((genres: Genre[]) => {
       if (genres.length === 0) {
@@ -37,9 +36,7 @@ router.get('/', (req: Request, res: Response) => {
 
       return res.status(200).json({ data: genres });
     })
-    .catch(error => {
-      return res.status(500).json({ message: 'Internal Server Error' });
-    });
+    .catch(error => next(error));
 });
 
 /**
@@ -67,12 +64,8 @@ router.get('/', (req: Request, res: Response) => {
  *       500:
  *         description: Internal Server Error
  */
-router.post('/', (req: Request, res: Response) => {
+router.post('/', (req: Request, res: Response, next: NextFunction) => {
   const { name } = req.body;
-
-  if (!name) {
-    return res.status(400).json({ error: 'Fill in required field' });
-  }
 
   const genre = new GenreModel({ name });
 
@@ -81,9 +74,7 @@ router.post('/', (req: Request, res: Response) => {
     .then((genre: Genre | null) => {
       return res.status(201).json({ data: genre });
     })
-    .catch(error => {
-      return res.status(500).json({ message: 'Internal Server Error' });
-    });
+    .catch(error => next(error));
 });
 
 /**
@@ -120,26 +111,14 @@ router.post('/', (req: Request, res: Response) => {
  *       500:
  *         description: Internal Server Error
  */
-router.put('/:id', (req: Request, res: Response) => {
-  const { name } = req.body;
-
-  if (!name) {
-    return res.status(400).json({ error: 'Fill in required field' });
-  }
-
+router.put('/:id', (req: Request, res: Response, next: NextFunction) => {
   const genreId = req.params.id;
 
   GenreModel.findByIdAndUpdate(genreId, req.body)
     .then((genre: Genre | null) => {
       return res.status(200).json({ data: genre });
     })
-    .catch(error => {
-      if (error instanceof MongooseError) {
-        return res.status(404).json({ error: 'Genre not found' });
-      }
-
-      return res.status(500).json({ message: 'Internal Server Error' });
-    });
+    .catch(error => next(error));
 });
 
 /**
@@ -164,20 +143,14 @@ router.put('/:id', (req: Request, res: Response) => {
  *       500:
  *         description: Internal Server Error
  */
-router.delete('/:id', (req: Request, res: Response) => {
+router.delete('/:id', (req: Request, res: Response, next: NextFunction) => {
   const genreId = req.params.id;
 
   GenreModel.findByIdAndDelete(genreId)
     .then((genre: Genre | null) => {
       return res.status(200).json({ data: 'Genre deleted successfully' });
     })
-    .catch(error => {
-      if (error instanceof MongooseError) {
-        return res.status(404).json({ error: 'Genre not found' });
-      }
-
-      return res.status(500).json({ message: 'Internal Server Error' });
-    });
+    .catch(error => next(error));
 });
 
 export default router;

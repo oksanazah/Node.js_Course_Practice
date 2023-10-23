@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-export interface Error {
+export interface CustomError {
   status: number;
   message: string;
 }

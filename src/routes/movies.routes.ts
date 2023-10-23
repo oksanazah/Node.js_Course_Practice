@@ -1,5 +1,4 @@
-import { Router, Request, Response } from 'express';
-import { MongooseError } from 'mongoose';
+import { Router, Request, Response, NextFunction } from 'express';
 
 import { MovieModel } from '../models/movies.schemas';
 import { Movie } from '../models/models';
@@ -34,7 +33,7 @@ const router: Router = Router();
  *       500:
  *         description: Internal Server Error
  */
-router.get('/', (req: Request, res: Response) => {
+router.get('/', (req: Request, res: Response, next: NextFunction) => {
   MovieModel.find()
     .then((movies: Movie[]) => {
       if (movies.length === 0) {
@@ -43,9 +42,7 @@ router.get('/', (req: Request, res: Response) => {
 
       return res.status(200).json({ data: movies });
     })
-    .catch(error => {
-      return res.status(500).json({ message: 'Internal Server Error' });
-    });
+    .catch(error => next(error));
 });
 
 /**
@@ -77,20 +74,14 @@ router.get('/', (req: Request, res: Response) => {
  *       500:
  *         description: Internal Server Error
  */
-router.get('/:id', (req: Request, res: Response) => {
+router.get('/:id', (req: Request, res: Response, next: NextFunction) => {
   const movieId = req.params.id;
 
   MovieModel.findById(movieId)
     .then((movie: Movie | null) => {
       return res.status(200).json({ data: movie });
     })
-    .catch(error => {
-      if (error instanceof MongooseError) {
-        return res.status(404).json({ error: 'Movie not found' });
-      }
-
-      return res.status(500).json({ message: 'Internal Server Error' });
-    });
+    .catch(error => next(error));
 });
 
 /**
@@ -124,12 +115,8 @@ router.get('/:id', (req: Request, res: Response) => {
  *       500:
  *         description: Internal Server Error
  */
-router.post('/', (req: Request, res: Response) => {
+router.post('/', (req: Request, res: Response, next: NextFunction) => {
   const { title, description, releaseDate, genre } = req.body;
-
-  if (!title || !description || !releaseDate || !genre) {
-    return res.status(400).json({ error: 'Fill in all required fields' });
-  }
 
   const movie = new MovieModel({ title, description, releaseDate, genre });
 
@@ -138,9 +125,7 @@ router.post('/', (req: Request, res: Response) => {
     .then((movie: Movie | null) => {
       return res.status(201).json({ data: movie });
     })
-    .catch(error => {
-      return res.status(500).json({ message: 'Internal Server Error' });
-    });
+    .catch(error => next(error));
 });
 
 /**
@@ -183,26 +168,14 @@ router.post('/', (req: Request, res: Response) => {
  *       500:
  *         description: Internal Server Error
  */
-router.put('/:id', (req: Request, res: Response) => {
-  const { title, description, releaseDate, genre } = req.body;
-
-  if (!title || !description || !releaseDate || !genre) {
-    return res.status(400).json({ error: 'Fill in all required fields' });
-  }
-
+router.put('/:id', (req: Request, res: Response, next: NextFunction) => {
   const movieId = req.params.id;
 
   MovieModel.findByIdAndUpdate(movieId, req.body)
     .then((movie: Movie | null) => {
       return res.status(200).json({ data: movie });
     })
-    .catch(error => {
-      if (error instanceof MongooseError) {
-        return res.status(404).json({ error: 'Movie not found' });
-      }
-
-      return res.status(500).json({ message: 'Internal Server Error' });
-    });
+    .catch(error => next(error));
 });
 
 /**
@@ -227,20 +200,14 @@ router.put('/:id', (req: Request, res: Response) => {
  *       500:
  *         description: Internal Server Error
  */
-router.delete('/:id', (req: Request, res: Response) => {
+router.delete('/:id', (req: Request, res: Response, next: NextFunction) => {
   const movieId = req.params.id;
 
   MovieModel.findByIdAndDelete(movieId)
     .then((movie: Movie | null) => {
       return res.status(200).json({ data: 'Movie deleted successfully' });
     })
-    .catch(error => {
-      if (error instanceof MongooseError) {
-        return res.status(404).json({ error: 'Movie not found' });
-      }
-
-      return res.status(500).json({ message: 'Internal Server Error' });
-    });
+    .catch(error => next(error));
 });
 
 /**
@@ -276,22 +243,23 @@ router.delete('/:id', (req: Request, res: Response) => {
  *       500:
  *         description: Internal Server Error
  */
-router.get('/genre/:genreName', (req: Request, res: Response) => {
-  const genreName = req.params.genreName;
+router.get(
+  '/genre/:genreName',
+  (req: Request, res: Response, next: NextFunction) => {
+    const genreName = req.params.genreName;
 
-  MovieModel.find({ genre: genreName })
-    .then((movies: Movie[]) => {
-      if (movies.length === 0) {
-        return res
-          .status(200)
-          .json({ data: 'Movies by this genre not added yet' });
-      }
+    MovieModel.find({ genre: genreName })
+      .then((movies: Movie[]) => {
+        if (movies.length === 0) {
+          return res
+            .status(200)
+            .json({ data: 'Movies by this genre not added yet' });
+        }
 
-      return res.status(200).json({ data: movies });
-    })
-    .catch(error => {
-      return res.status(500).json({ message: 'Internal Server Error' });
-    });
-});
+        return res.status(200).json({ data: movies });
+      })
+      .catch(error => next(error));
+  },
+);
 
 export default router;
