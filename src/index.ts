@@ -1,6 +1,7 @@
 import express, { Request, Response, Express } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
 import swaggerSpec from './utils/swagger';
 import errorHandler from './middleware/error-handler';
@@ -9,10 +10,11 @@ import productsRouter from './routes/products.routes';
 import moviesRouter from './routes/movies.routes';
 import genresRouter from './routes/genres.routes';
 
+dotenv.config();
+
 const app: Express = express();
-const PORT = 3000;
-const MONGODB_URI =
-  'mongodb+srv://oksanazaharchenko:4bIg0tLnbnA5edNR@cluster0.voxnl81.mongodb.net/NODE_JS_DB?retryWrites=true&w=majority';
+const PORT = process.env.PORT || 3000;
+const MONGODB_URI = process.env.MONGODB_URI || '';
 
 app.use(express.json());
 

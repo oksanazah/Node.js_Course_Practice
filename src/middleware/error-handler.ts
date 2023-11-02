@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { MongooseError, Error } from 'mongoose';
-import { MongoServerError } from 'mongodb';
+import { MongooseError } from 'mongoose';
 
-import { CustomError } from '../models/models';
+import { CustomError } from '../interfaces/interfaces';
 
 const errorHandler = (
   error: unknown,
@@ -10,14 +9,6 @@ const errorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
-  if (error instanceof Error.ValidationError) {
-    return res.status(400).json({ error: 'Fill in all required fields' });
-  }
-
-  if (error instanceof MongoServerError && error.code === 11000) {
-    return res.status(400).json({ error: 'Field must be unique' });
-  }
-
   if (error instanceof MongooseError) {
     return res.status(404).json({ error: 'Not found' });
   }

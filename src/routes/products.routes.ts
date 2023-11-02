@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 
 import { products } from '../data/products';
-import { Product } from '../models/models';
+import { Product } from '../interfaces/interfaces';
 
 const router: Router = Router();
 

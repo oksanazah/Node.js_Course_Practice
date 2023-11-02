@@ -1,7 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 
 import { GenreModel } from '../models/genres.schemas';
-import { Genre } from '../models/models';
+import { Genre } from '../interfaces/interfaces';
+import validateGenre from '../middleware/genres.validation';
 
 const router: Router = Router();
 
@@ -27,16 +28,18 @@ const router: Router = Router();
  *       500:
  *         description: Internal Server Error
  */
-router.get('/', (req: Request, res: Response, next: NextFunction) => {
-  GenreModel.find()
-    .then((genres: Genre[]) => {
-      if (genres.length === 0) {
-        return res.status(200).json({ data: 'Genres not added yet' });
-      }
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const genres: Genre[] = await GenreModel.find();
 
-      return res.status(200).json({ data: genres });
-    })
-    .catch(error => next(error));
+    if (genres.length === 0) {
+      return res.status(200).json({ data: 'Genres not added yet' });
+    }
+
+    return res.status(200).json({ data: genres });
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
@@ -64,18 +67,22 @@ router.get('/', (req: Request, res: Response, next: NextFunction) => {
  *       500:
  *         description: Internal Server Error
  */
-router.post('/', (req: Request, res: Response, next: NextFunction) => {
-  const { name } = req.body;
+router.post(
+  '/',
+  validateGenre,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { name } = req.body;
 
-  const genre = new GenreModel({ name });
+      const genre = new GenreModel({ name });
+      const newGenre: Genre | null = await genre.save();
 
-  genre
-    .save()
-    .then((genre: Genre | null) => {
-      return res.status(201).json({ data: genre });
-    })
-    .catch(error => next(error));
-});
+      return res.status(201).json({ data: newGenre });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 /**
  * @swagger
@@ -111,15 +118,24 @@ router.post('/', (req: Request, res: Response, next: NextFunction) => {
  *       500:
  *         description: Internal Server Error
  */
-router.put('/:id', (req: Request, res: Response, next: NextFunction) => {
-  const genreId = req.params.id;
+router.put(
+  '/:id',
+  validateGenre,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const genreId = req.params.id;
 
-  GenreModel.findByIdAndUpdate(genreId, req.body)
-    .then((genre: Genre | null) => {
-      return res.status(200).json({ data: genre });
-    })
-    .catch(error => next(error));
-});
+      const updatedGenre: Genre | null = await GenreModel.findByIdAndUpdate(
+        genreId,
+        req.body,
+      );
+
+      return res.status(200).json({ data: updatedGenre });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 /**
  * @swagger
@@ -143,14 +159,20 @@ router.put('/:id', (req: Request, res: Response, next: NextFunction) => {
  *       500:
  *         description: Internal Server Error
  */
-router.delete('/:id', (req: Request, res: Response, next: NextFunction) => {
-  const genreId = req.params.id;
+router.delete(
+  '/:id',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const genreId = req.params.id;
 
-  GenreModel.findByIdAndDelete(genreId)
-    .then((genre: Genre | null) => {
+      const deletedGenre: Genre | null =
+        await GenreModel.findByIdAndDelete(genreId);
+
       return res.status(200).json({ data: 'Genre deleted successfully' });
-    })
-    .catch(error => next(error));
-});
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 export default router;

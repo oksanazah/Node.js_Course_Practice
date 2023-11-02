@@ -1,7 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 
 import { MovieModel } from '../models/movies.schemas';
-import { Movie } from '../models/models';
+import { Movie } from '../interfaces/interfaces';
+import validateMovie from '../middleware/movie.validation';
 
 const router: Router = Router();
 
@@ -23,26 +24,28 @@ const router: Router = Router();
  *               - title: Some Movie
  *                 description: Description
  *                 releaseDate: 2023-10-01
- *                 genre: Action
+ *                 genre: [Action]
  *               - title: Other Movie
  *                 description: Description
  *                 releaseDate: 2023-10-01
- *                 genre: Drama
+ *                 genre: [Drama]
  *       404:
  *         description: Movies not found
  *       500:
  *         description: Internal Server Error
  */
-router.get('/', (req: Request, res: Response, next: NextFunction) => {
-  MovieModel.find()
-    .then((movies: Movie[]) => {
-      if (movies.length === 0) {
-        return res.status(200).json({ data: 'Movies not added yet' });
-      }
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const movies: Movie[] = await MovieModel.find();
 
-      return res.status(200).json({ data: movies });
-    })
-    .catch(error => next(error));
+    if (movies.length === 0) {
+      return res.status(200).json({ data: 'Movies not added yet' });
+    }
+
+    return res.status(200).json({ data: movies });
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
@@ -68,20 +71,22 @@ router.get('/', (req: Request, res: Response, next: NextFunction) => {
  *               title: Some Movie
  *               description: Description
  *               releaseDate: 2023-10-01
- *               genre: Action
+ *               genre: [Action]
  *       404:
  *         description: Movie not found
  *       500:
  *         description: Internal Server Error
  */
-router.get('/:id', (req: Request, res: Response, next: NextFunction) => {
-  const movieId = req.params.id;
+router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const movieId = req.params.id;
 
-  MovieModel.findById(movieId)
-    .then((movie: Movie | null) => {
-      return res.status(200).json({ data: movie });
-    })
-    .catch(error => next(error));
+    const movie: Movie | null = await MovieModel.findById(movieId);
+
+    return res.status(200).json({ data: movie });
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
@@ -99,7 +104,7 @@ router.get('/:id', (req: Request, res: Response, next: NextFunction) => {
  *             title: New Movie
  *             description: Description
  *             releaseDate: 2023-10-01
- *             genre: Drama
+ *             genre: [Drama]
  *     responses:
  *       201:
  *         description: Movie created successfully
@@ -109,24 +114,28 @@ router.get('/:id', (req: Request, res: Response, next: NextFunction) => {
  *               title: New Movie
  *               description: Description
  *               releaseDate: 2023-10-01
- *               genre: Drama
+ *               genre: [Drama]
  *       400:
  *         description: Bad Request
  *       500:
  *         description: Internal Server Error
  */
-router.post('/', (req: Request, res: Response, next: NextFunction) => {
-  const { title, description, releaseDate, genre } = req.body;
+router.post(
+  '/',
+  validateMovie,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { title, description, releaseDate, genre } = req.body;
 
-  const movie = new MovieModel({ title, description, releaseDate, genre });
+      const movie = new MovieModel({ title, description, releaseDate, genre });
+      const newMovie: Movie | null = await movie.save();
 
-  movie
-    .save()
-    .then((movie: Movie | null) => {
-      return res.status(201).json({ data: movie });
-    })
-    .catch(error => next(error));
-});
+      return res.status(201).json({ data: newMovie });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 /**
  * @swagger
@@ -150,7 +159,7 @@ router.post('/', (req: Request, res: Response, next: NextFunction) => {
  *             title: Updated Movie
  *             description: Description
  *             releaseDate: 2023-10-01
- *             genre: Drama
+ *             genre: [Drama]
  *     responses:
  *       200:
  *         description: Movie updated successfully
@@ -160,7 +169,7 @@ router.post('/', (req: Request, res: Response, next: NextFunction) => {
  *               title: Updated Movie
  *               description: Description
  *               releaseDate: 2023-10-01
- *               genre: Drama
+ *               genre: [Drama]
  *       400:
  *         description: Bad Request
  *       404:
@@ -168,15 +177,24 @@ router.post('/', (req: Request, res: Response, next: NextFunction) => {
  *       500:
  *         description: Internal Server Error
  */
-router.put('/:id', (req: Request, res: Response, next: NextFunction) => {
-  const movieId = req.params.id;
+router.put(
+  '/:id',
+  validateMovie,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const movieId = req.params.id;
 
-  MovieModel.findByIdAndUpdate(movieId, req.body)
-    .then((movie: Movie | null) => {
-      return res.status(200).json({ data: movie });
-    })
-    .catch(error => next(error));
-});
+      const updatedMovie: Movie | null = await MovieModel.findByIdAndUpdate(
+        movieId,
+        req.body,
+      );
+
+      return res.status(200).json({ data: updatedMovie });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 /**
  * @swagger
@@ -200,15 +218,21 @@ router.put('/:id', (req: Request, res: Response, next: NextFunction) => {
  *       500:
  *         description: Internal Server Error
  */
-router.delete('/:id', (req: Request, res: Response, next: NextFunction) => {
-  const movieId = req.params.id;
+router.delete(
+  '/:id',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const movieId = req.params.id;
 
-  MovieModel.findByIdAndDelete(movieId)
-    .then((movie: Movie | null) => {
+      const deletedMovie: Movie | null =
+        await MovieModel.findByIdAndDelete(movieId);
+
       return res.status(200).json({ data: 'Movie deleted successfully' });
-    })
-    .catch(error => next(error));
-});
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 /**
  * @swagger
@@ -233,11 +257,11 @@ router.delete('/:id', (req: Request, res: Response, next: NextFunction) => {
  *               - title: Some Movie
  *                 description: Description
  *                 releaseDate: 2023-10-01
- *                 genre: Action
+ *                 genre: [Action]
  *               - title: Other Movie
  *                 description: Description
  *                 releaseDate: 2023-10-01
- *                 genre: Action
+ *                 genre: [Action]
  *       404:
  *         description: Movies not found
  *       500:
@@ -245,20 +269,22 @@ router.delete('/:id', (req: Request, res: Response, next: NextFunction) => {
  */
 router.get(
   '/genre/:genreName',
-  (req: Request, res: Response, next: NextFunction) => {
-    const genreName = req.params.genreName;
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const genreName = req.params.genreName;
 
-    MovieModel.find({ genre: genreName })
-      .then((movies: Movie[]) => {
-        if (movies.length === 0) {
-          return res
-            .status(200)
-            .json({ data: 'Movies by this genre not added yet' });
-        }
+      const movies: Movie[] = await MovieModel.find({ genre: genreName });
 
-        return res.status(200).json({ data: movies });
-      })
-      .catch(error => next(error));
+      if (movies.length === 0) {
+        return res
+          .status(200)
+          .json({ data: 'Movies by this genre not added yet' });
+      }
+
+      return res.status(200).json({ data: movies });
+    } catch (error) {
+      next(error);
+    }
   },
 );
 
