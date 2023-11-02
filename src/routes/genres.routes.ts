@@ -168,6 +168,10 @@ router.delete(
       const deletedGenre: Genre | null =
         await GenreModel.findByIdAndDelete(genreId);
 
+      if (!deletedGenre) {
+        return res.status(404).json({ error: 'Genre not found' });
+      }
+
       return res.status(200).json({ data: 'Genre deleted successfully' });
     } catch (error) {
       next(error);

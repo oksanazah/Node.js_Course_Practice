@@ -227,6 +227,10 @@ router.delete(
       const deletedMovie: Movie | null =
         await MovieModel.findByIdAndDelete(movieId);
 
+      if (!deletedMovie) {
+        return res.status(404).json({ error: 'Movie not found' });
+      }
+
       return res.status(200).json({ data: 'Movie deleted successfully' });
     } catch (error) {
       next(error);
