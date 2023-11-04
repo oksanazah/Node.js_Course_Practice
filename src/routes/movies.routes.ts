@@ -1,8 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 
-import { MovieModel } from '../models/movies.schemas';
+import { MovieModel, movieJoiSchema } from '../models/movies.schemas';
 import { Movie } from '../interfaces/interfaces';
-import validateMovie from '../middleware/movie.validation';
+import validateSchema from '../middleware/validation';
 
 const router: Router = Router();
 
@@ -122,7 +122,7 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
  */
 router.post(
   '/',
-  validateMovie,
+  validateSchema(movieJoiSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { title, description, releaseDate, genre } = req.body;
@@ -179,7 +179,7 @@ router.post(
  */
 router.put(
   '/:id',
-  validateMovie,
+  validateSchema(movieJoiSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const movieId = req.params.id;

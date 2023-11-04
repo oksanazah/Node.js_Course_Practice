@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose';
+import Joi from 'joi';
 
 const MovieSchema = new Schema(
   {
@@ -22,4 +23,13 @@ const MovieSchema = new Schema(
   { versionKey: false },
 );
 
-export const MovieModel = model('Movie', MovieSchema);
+const movieJoiSchema = Joi.object({
+  title: Joi.string().required(),
+  description: Joi.string().required(),
+  releaseDate: Joi.date().required(),
+  genre: Joi.array().items(Joi.string()).required(),
+});
+
+const MovieModel = model('Movie', MovieSchema);
+
+export { movieJoiSchema, MovieModel };

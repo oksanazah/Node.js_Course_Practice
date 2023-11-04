@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose';
+import Joi from 'joi';
 
 const GenreSchema = new Schema(
   {
@@ -11,4 +12,10 @@ const GenreSchema = new Schema(
   { versionKey: false },
 );
 
-export const GenreModel = model('Genre', GenreSchema);
+const genreJoiSchema = Joi.object({
+  name: Joi.string().required(),
+});
+
+const GenreModel = model('Genre', GenreSchema);
+
+export { genreJoiSchema, GenreModel };

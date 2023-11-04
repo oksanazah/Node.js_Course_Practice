@@ -1,8 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 
-import { GenreModel } from '../models/genres.schemas';
+import { GenreModel, genreJoiSchema } from '../models/genres.schemas';
 import { Genre } from '../interfaces/interfaces';
-import validateGenre from '../middleware/genres.validation';
+import validateSchema from '../middleware/validation';
 
 const router: Router = Router();
 
@@ -69,7 +69,7 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
  */
 router.post(
   '/',
-  validateGenre,
+  validateSchema(genreJoiSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name } = req.body;
@@ -120,7 +120,7 @@ router.post(
  */
 router.put(
   '/:id',
-  validateGenre,
+  validateSchema(genreJoiSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const genreId = req.params.id;
