@@ -1,4 +1,4 @@
-import { Product } from '../models/models';
+import { Product } from '../interfaces/interfaces';
 
 export const products: Product[] = [
   { id: '1', name: 'Product 1' },

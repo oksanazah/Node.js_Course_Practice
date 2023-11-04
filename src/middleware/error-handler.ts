@@ -1,15 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
+import { MongooseError } from 'mongoose';
 
-import { Error } from '../models/models';
+import { CustomError } from '../interfaces/interfaces';
 
 const errorHandler = (
-  error: Error,
+  error: unknown,
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  if (error.status) {
-    return res.status(error.status).json({ message: error.message });
+  if (error instanceof MongooseError) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+
+  if ((error as CustomError).status) {
+    return res
+      .status((error as CustomError).status)
+      .json({ message: (error as CustomError).message });
   }
 
   return res.status(500).json({ message: 'Internal Server Error' });
