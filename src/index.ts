@@ -34,16 +34,20 @@ app.use('/genres', genresRouter);
 
 app.use(errorHandler);
 
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => {
-    console.log('Connected to Database');
+if (process.env.NODE_ENV !== 'test') {
+  mongoose
+    .connect(MONGODB_URI)
+    .then(() => {
+      console.log('Connected to Database');
 
-    app.listen(PORT, (): void => {
-      console.log(`Server is running on port ${PORT}`);
+      app.listen(PORT, (): void => {
+        console.log(`Server is running on port ${PORT}`);
+      });
+    })
+    .catch(err => {
+      console.log('Connection failed');
+      console.log(err);
     });
-  })
-  .catch(err => {
-    console.log('Connection failed');
-    console.log(err);
-  });
+}
+
+export default app;
