@@ -5,11 +5,6 @@ export interface CustomError {
   message: string;
 }
 
-export interface Product {
-  id: string;
-  name: string;
-}
-
 export interface Movie {
   _id: mongoose.Types.ObjectId;
   title: string;

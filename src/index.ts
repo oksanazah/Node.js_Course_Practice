@@ -6,7 +6,6 @@ import dotenv from 'dotenv';
 import swaggerSpec from './utils/swagger';
 import errorHandler from './middleware/error-handler';
 import healthChekcRouter from './routes/health-check.routes';
-import productsRouter from './routes/products.routes';
 import moviesRouter from './routes/movies.routes';
 import genresRouter from './routes/genres.routes';
 
@@ -25,8 +24,6 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.use('/health-check', healthChekcRouter);
-
-app.use('/products', productsRouter);
 
 app.use('/movies', moviesRouter);
 
