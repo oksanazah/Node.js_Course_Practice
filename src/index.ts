@@ -6,7 +6,6 @@ import dotenv from 'dotenv';
 import swaggerSpec from './utils/swagger';
 import errorHandler from './middleware/error-handler';
 import healthChekcRouter from './routes/health-check.routes';
-import productsRouter from './routes/products.routes';
 import moviesRouter from './routes/movies.routes';
 import genresRouter from './routes/genres.routes';
 
@@ -26,24 +25,26 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use('/health-check', healthChekcRouter);
 
-app.use('/products', productsRouter);
-
 app.use('/movies', moviesRouter);
 
 app.use('/genres', genresRouter);
 
 app.use(errorHandler);
 
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => {
-    console.log('Connected to Database');
+if (process.env.NODE_ENV !== 'test') {
+  mongoose
+    .connect(MONGODB_URI)
+    .then(() => {
+      console.log('Connected to Database');
 
-    app.listen(PORT, (): void => {
-      console.log(`Server is running on port ${PORT}`);
+      app.listen(PORT, (): void => {
+        console.log(`Server is running on port ${PORT}`);
+      });
+    })
+    .catch(err => {
+      console.log('Connection failed');
+      console.log(err);
     });
-  })
-  .catch(err => {
-    console.log('Connection failed');
-    console.log(err);
-  });
+}
+
+export default app;
